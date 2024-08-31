@@ -9,6 +9,6 @@ CREATE TABLE snippets (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    created TIMESTAMP WITH TIME ZONE
+    created TIMESTAMP WITH TIME ZONE,
     expires TIMESTAMP WITH TIME ZONE
 );
