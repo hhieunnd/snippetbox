@@ -13,3 +13,12 @@ CREATE TABLE snippets (
   created TIMESTAMP WITH TIME ZONE,
   expires TIMESTAMP WITH TIME ZONE
 );
+
+
+CREATE TABLE sessions (
+    token CHAR(43) PRIMARY KEY,
+    data BYTEA NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions (expiry);
