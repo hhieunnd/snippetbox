@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -30,7 +31,7 @@ func (u *UserModel) Insert(name, email, password string) error {
 		return err
 	}
 
-	stmt := `INSERT INTO users (name, email, password, created)
+	stmt := `INSERT INTO users (name, email, hashed_password, created)
 		VALUES ($1, $2, $3, CURRENT_TIMESTAMP AT TIME ZONE 'UTC')`
 
 	_, err = u.DB.Exec(context.Background(), stmt, name, email, string(hashedPassword))
@@ -50,7 +51,29 @@ func (u *UserModel) Insert(name, email, password string) error {
 }
 
 func (u *UserModel) Authenticate(email, password string) (int, error) {
-	return 0, nil
+	var id int
+	var hashedPassword []byte
+	stmt := "SELECT id, hashed_password FROM users WHERE email = $1"
+
+	err := u.DB.QueryRow(context.Background(), stmt, email).Scan(&id, &hashedPassword)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, ErrInvalidCredentials
+		}
+
+		return 0, err
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		}
+
+		return 0, err
+	}
+
+	return id, nil
 }
 
 // Check if uses exists with a specific ID.

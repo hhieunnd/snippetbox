@@ -62,6 +62,7 @@ func main() {
 		infoLog:        infoLog,
 		errorLog:       errorLog,
 		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecoder:    form.NewDecoder(),
 		sectionManager: sessionManager,
